@@ -14,8 +14,10 @@ const AddMedicine = ({ onAddMedicine }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Calculate total payment
-      const totalPayment = parseFloat(formData.cost) * parseInt(formData.quantity);
+      // Calculate total payment only if cost and quantity are provided
+      const totalPayment = formData.cost && formData.quantity 
+        ? parseFloat(formData.cost) * parseInt(formData.quantity)
+        : 0;
       
       const newMedicine = {
         ...formData,
@@ -56,7 +58,7 @@ const AddMedicine = ({ onAddMedicine }) => {
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Medicine Name
+            Medicine Name *
           </label>
           <input
             type="text"
@@ -77,14 +79,13 @@ const AddMedicine = ({ onAddMedicine }) => {
             name="cost"
             value={formData.cost}
             onChange={handleChange}
-            required
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Quantity
+            Quantity *
           </label>
           <input
             type="number"
@@ -105,7 +106,6 @@ const AddMedicine = ({ onAddMedicine }) => {
             name="purchase_date"
             value={formData.purchase_date}
             onChange={handleChange}
-            required
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -119,7 +119,6 @@ const AddMedicine = ({ onAddMedicine }) => {
             name="expiry_date"
             value={formData.expiry_date}
             onChange={handleChange}
-            required
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>

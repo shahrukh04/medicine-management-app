@@ -177,6 +177,81 @@ const MedicineTable = () => {
     return filteredMedicines;
   }, [medicines, searchTerm, sortConfig]);
 
+
+
+
+
+  //aa code for bulk search function
+// Add this state for bulk price update
+const [bulkUpdatePrice, setBulkUpdatePrice] = useState('');
+
+// Add this function for bulk price update
+const handleBulkPriceUpdate = async () => {
+  if (!selectedMedicineName || !bulkUpdatePrice) {
+    toast.error('Please select a medicine and enter new price');
+    return;
+  }
+
+  try {
+    const medicinesWithSameName = medicines.filter(
+      med => med.medicine_name.toLowerCase() === selectedMedicineName.toLowerCase()
+    );
+
+    for (const medicine of medicinesWithSameName) {
+      await dbOperations.updateMedicine(db, {
+        ...medicine,
+        cost: parseFloat(bulkUpdatePrice)
+      });
+    }
+
+    toast.success(`Updated price for all ${selectedMedicineName} medicines`);
+    setBulkUpdatePrice('');
+    setSelectedMedicineName('');
+  } catch (error) {
+    console.error("Error updating prices:", error);
+    toast.error("Failed to update prices");
+  }
+};
+
+// Add this function to get unique medicine names
+const uniqueMedicineNames = React.useMemo(() => {
+  return [...new Set(medicines.map(med => med.medicine_name))];
+}, [medicines]);
+
+// Add this function to group medicines by name
+const groupedMedicines = React.useMemo(() => {
+  return medicines.reduce((acc, medicine) => {
+    const name = medicine.medicine_name.toLowerCase();
+    if (!acc[name]) {
+      acc[name] = [];
+    }
+    acc[name].push(medicine);
+    return acc;
+  }, {});
+}, [medicines]);
+
+
+
+const [selectedMedicineName, setSelectedMedicineName] = useState('');
+const [searchQuery, setSearchQuery] = useState('');
+const [dropdownVisible, setDropdownVisible] = useState(false);
+
+// Filtered list based on search query
+const filteredMedicineNames = uniqueMedicineNames.filter((name) =>
+  name.toLowerCase().includes(searchQuery.toLowerCase())
+);
+
+
+
+  //
+
+  
+
+
+
+
+
+
      return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header Section */}
@@ -240,7 +315,7 @@ const MedicineTable = () => {
           </motion.div>
         </div>
   
-        {/* Search and Filter Section */}
+        {/* Search and Filter Section
         <div className="mb-6">
           <div className="relative">
             <input
@@ -252,8 +327,181 @@ const MedicineTable = () => {
             />
             <FaSearch className="absolute left-4 top-4 text-gray-400" />
           </div>
+        </div> */}
+{/* Search and Filter Section */}
+<div className="mb-8 space-y-6">
+  {/* Search Bar */}
+  <div className="relative group">
+    <input
+      type="text"
+      placeholder="Search medicines..."
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="w-full px-6 py-4 pl-14 rounded-xl border-2 border-gray-200 
+                 bg-white/70 backdrop-blur-sm focus:border-blue-400 
+                 focus:ring-4 focus:ring-blue-400/10 shadow-lg 
+                 transition-all duration-300 outline-none text-gray-700 
+                 placeholder-gray-400 text-lg"
+    />
+    <FaSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 
+                        text-xl group-hover:text-blue-500 transition-colors duration-200" />
+  </div>
+
+  {/* Bulk Price Update Section */}
+  <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl 
+                  border border-gray-100">
+    <div className="flex items-center mb-6">
+      <div className="h-10 w-2 bg-gradient-to-b from-blue-500 to-purple-500 
+                      rounded-full mr-3"></div>
+      <h3 className="text-2xl font-bold text-gray-800">
+        Bulk Price Update
+      </h3>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+  {/* Select Medicine Dropdown with Search */}
+  <div className="relative">
+    <label className="block text-sm font-medium text-gray-600 mb-2 ml-1">
+      Select Medicine
+    </label>
+    
+    {/* Search Bar */}
+    <input
+      type="text"
+      placeholder="Search medicine..."
+      value={searchQuery}
+      onChange={(e) => setSearchQuery(e.target.value)}
+      onFocus={() => setDropdownVisible(true)} // Show dropdown on focus
+      className="w-full px-4 py-2 mb-2 rounded-xl border-2 border-gray-200
+                 focus:border-blue-400 focus:ring-4 focus:ring-blue-400/10 
+                 transition-all duration-200 text-gray-700"
+    />
+
+    {/* Dropdown */}
+    {dropdownVisible && filteredMedicineNames.length > 0 && (
+      <div className="absolute z-10 w-full max-h-48 overflow-y-auto border-2 border-gray-200 
+                      rounded-xl bg-white shadow-md">
+        {filteredMedicineNames.map((name) => (
+          <div
+            key={name}
+            onClick={() => {
+              setSearchQuery(name); // Show the selected name in the search bar
+              setSelectedMedicineName(name); // Update the selected medicine
+              setDropdownVisible(false); // Hide the dropdown after selection
+            }}
+            className={`cursor-pointer px-4 py-2 hover:bg-blue-100 text-gray-700 
+                        ${selectedMedicineName === name ? 'bg-blue-200' : ''}`}
+          >
+            {name}
+          </div>
+        ))}
+      </div>
+    )}
+
+    {/* Dropdown Indicator */}
+    <div className="absolute right-4 top-[42px] pointer-events-none">
+      <svg
+        className="h-5 w-5 text-gray-400"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M19 9l-7 7-7-7"
+        />
+      </svg>
+    </div>
+  </div>
+
+
+
+
+      {/* Price Input */}
+      <div>
+        <label className="block text-sm font-medium text-gray-600 mb-2 ml-1">
+          New Price
+        </label>
+        <input
+          type="number"
+          value={bulkUpdatePrice}
+          onChange={(e) => setBulkUpdatePrice(e.target.value)}
+          placeholder="Enter new price"
+          className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 
+                     bg-white/70 focus:border-blue-400 focus:ring-4 
+                     focus:ring-blue-400/10 transition-all duration-200 
+                     text-gray-700 placeholder-gray-400"
+        />
+      </div>
+
+      {/* Update Button */}
+      <div className="flex items-end">
+        <button
+          onClick={handleBulkPriceUpdate}
+          className="w-full py-3 px-6 bg-gradient-to-r from-blue-500 to-purple-500 
+                     hover:from-blue-600 hover:to-purple-600 text-white rounded-xl 
+                     font-medium text-lg shadow-lg hover:shadow-xl 
+                     transform hover:scale-[1.02] active:scale-[0.98] 
+                     transition-all duration-200 flex items-center justify-center 
+                     gap-2"
+        >
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Update Prices
+        </button>
+      </div>
+    </div>
+
+    {/* Grouped Results Section */}
+    {searchTerm && (
+      <div className="mt-8 space-y-4">
+        <h4 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <svg className="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          Grouped Results
+        </h4>
+        <div className="grid gap-4">
+          {Object.entries(groupedMedicines)
+            .filter(([name]) => name.includes(searchTerm.toLowerCase()))
+            .map(([name, medicines]) => (
+              <div key={name} 
+                   className="bg-gradient-to-r from-blue-50 to-purple-50 
+                            p-4 rounded-xl border border-gray-100 shadow-md 
+                            hover:shadow-lg transition-shadow duration-200">
+                <div className="font-semibold text-lg text-gray-800 mb-2">
+                  {name}
+                </div>
+                <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <svg className="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                            d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                    </svg>
+                    <span>Quantity: {medicines.reduce((sum, med) => sum + parseInt(med.quantity), 0)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <svg className="h-5 w-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Price Range: ${Math.min(...medicines.map(med => parseFloat(med.cost)))} - 
+                          ${Math.max(...medicines.map(med => parseFloat(med.cost)))}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
         </div>
-  
+      </div>
+    )}
+  </div>
+</div>
+
              {/* Table Section */}
         <div className="bg-white shadow-xl rounded-lg overflow-hidden">
           <div className="overflow-x-auto">

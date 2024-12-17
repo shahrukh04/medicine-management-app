@@ -64,23 +64,23 @@ const MedicineForm = ({ onAddMedicine }) => {
       newErrors.medicine_name = 'Name is required';
     }
     
-    if (!formData.cost || formData.cost <= 0) {
-      newErrors.cost = 'Cost must be positive';
-    }
+    // if (!formData.cost || formData.cost <= 0) {
+    //   newErrors.cost = 'Cost must be positive';
+    // }
     
     if (!formData.quantity || formData.quantity <= 0) {
       newErrors.quantity = 'Quantity must be positive';
     }
     
-    if (!formData.purchase_date) {
-      newErrors.purchase_date = 'Purchase date is required';
-    }
+    // if (!formData.purchase_date) {
+    //   newErrors.purchase_date = 'Purchase date is required';
+    // }
     
-    if (!formData.expiry_date) {
-      newErrors.expiry_date = 'Expiry date is required';
-    } else if (new Date(formData.expiry_date) <= new Date(formData.purchase_date)) {
-      newErrors.expiry_date = 'Expiry date must be after purchase date';
-    }
+    // if (!formData.expiry_date) {
+    //   newErrors.expiry_date = 'Expiry date is required';
+    // } else if (new Date(formData.expiry_date) <= new Date(formData.purchase_date)) {
+    //   newErrors.expiry_date = 'Expiry date must be after purchase date';
+    // }
 
     // Check if medicine is expiring soon (within 30 days)
     if (formData.expiry_date) {
@@ -151,7 +151,7 @@ const MedicineForm = ({ onAddMedicine }) => {
         {/* Medicine Name Field */}
         <div className="col-span-1">
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Medicine Name
+            Medicine Name *
           </label>
           <input
             type="text"
@@ -202,7 +202,7 @@ const MedicineForm = ({ onAddMedicine }) => {
         {/* Quantity Field */}
         <div className="col-span-1">
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Quantity
+            Quantity *
           </label>
           <input
             type="number"

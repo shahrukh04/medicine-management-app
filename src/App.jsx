@@ -9,6 +9,11 @@ import MedicineTable from './components/MedicineTable';
 import MedicineForm from './components/MedicineForm';
 import { initDB, dbOperations } from './utils/indexedDB';
 
+
+
+
+
+
 const App = () => {
   const [medicines, setMedicines] = useState([]);
   const [db, setDB] = useState(null);
@@ -89,6 +94,9 @@ const App = () => {
   };
 
   return (
+    <>
+
+
     <BrowserRouter>
       <div className="min-h-screen bg-gray-50">
         <Toaster
@@ -163,6 +171,7 @@ const App = () => {
         </Routes>
       </div>
     </BrowserRouter>
+    </>
   );
 };
 
